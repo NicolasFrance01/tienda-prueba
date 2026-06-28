@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Insertar orden en DB ───────────────────────────────────────────────
-    const [order] = await sql<{ id: number; created_at: string }[]>`
+    const orderRows = await sql`
       INSERT INTO orders (status, total_amount, currency, items_count)
       VALUES (
         'pending',
@@ -40,7 +40,9 @@ export async function POST(req: NextRequest) {
         ${body.items.reduce((sum, i) => sum + i.quantity, 0)}
       )
       RETURNING id, created_at
-    `;
+    ` as { id: number; created_at: string }[];
+
+    const [order] = orderRows;
 
     // ── Insertar items ─────────────────────────────────────────────────────
     for (const item of body.items) {
