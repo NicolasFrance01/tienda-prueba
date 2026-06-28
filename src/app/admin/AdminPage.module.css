@@ -1,0 +1,206 @@
+.loginContainer {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg-body);
+}
+
+.loginForm {
+  background: var(--surface);
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border: 1px solid var(--border);
+}
+
+.loginForm h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.loginForm p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.loginForm input {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+}
+
+.loginForm input:focus {
+  border-color: var(--accent);
+}
+
+.loginForm button {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.loginForm button:hover {
+  opacity: 0.9;
+}
+
+.error {
+  color: #e53e3e;
+  font-size: 0.85rem;
+  text-align: center;
+  margin: 0;
+}
+
+/* ── Admin Dashboard ── */
+.adminContainer {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.logoutBtn {
+  background: transparent;
+  border: 1px solid var(--border);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+
+.logoutBtn:hover {
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+.tableWrapper {
+  background: var(--surface);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow-x: auto;
+}
+
+.ordersTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.ordersTable th, .ordersTable td {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.ordersTable th {
+  background: rgba(0,0,0,0.02);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.highlightRow {
+  background: rgba(255, 193, 7, 0.05); /* Soft yellow to highlight pending transfers */
+}
+
+.badgeMp, .badgeTransfer {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.badgeMp {
+  background: rgba(0, 158, 227, 0.1);
+  color: #009ee3;
+}
+
+.badgeTransfer {
+  background: rgba(76, 175, 80, 0.1);
+  color: #2e7d32;
+}
+
+.statusBadge {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.statusBadge.pending {
+  background: rgba(255, 152, 0, 0.1);
+  color: #f57c00;
+}
+
+.statusBadge.approved {
+  background: rgba(76, 175, 80, 0.1);
+  color: #2e7d32;
+}
+
+.statusBadge.rejected {
+  background: rgba(244, 67, 54, 0.1);
+  color: #d32f2f;
+}
+
+.contactActions {
+  display: flex;
+  gap: 8px;
+}
+
+.waBtn, .emailBtn {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.waBtn {
+  background: #25D366;
+  color: white;
+}
+
+.emailBtn {
+  background: #000;
+  color: white;
+}
+
+.waBtn:hover, .emailBtn:hover {
+  opacity: 0.8;
+}
+
+.emptyState {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 40px !important;
+}

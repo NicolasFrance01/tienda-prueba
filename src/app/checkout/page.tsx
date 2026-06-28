@@ -20,12 +20,28 @@ import styles from './CheckoutPage.module.css';
 export default function CheckoutPage() {
   const { items, totalItems, totalPrice, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
-  const [savedOrderId, setSavedOrderId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'mp' | 'transfer'>('mp');
+  
+  // ── Datos del Comprador (Transferencia) ──
+  const [buyerName, setBuyerName] = useState('');
+  const [buyerPhone, setBuyerPhone] = useState('');
+  const [buyerEmail, setBuyerEmail] = useState('');
+
+  // ── Copiar al portapapeles ──
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    alert(`${label} copiado: ${text}`);
+  };
 
   // ── Crear orden en DB + procesar pago ─────
   const handleCheckout = async () => {
+    if (paymentMethod === 'transfer') {
+      if (!buyerName || !buyerPhone || !buyerEmail) {
+        setError('Por favor completá todos tus datos para poder identificarte.');
+        return;
+      }
+    }
     setLoading(true);
     setError(null);
 
@@ -39,6 +55,9 @@ export default function CheckoutPage() {
         })),
         total_amount: totalPrice,
         payment_method: paymentMethod,
+        buyer_name: buyerName,
+        buyer_phone: buyerPhone,
+        buyer_email: buyerEmail,
       };
 
       const res = await fetch('/api/orders', {
@@ -59,9 +78,9 @@ export default function CheckoutPage() {
         clearCart();
         window.location.href = data.init_point;
       } else {
-        // Fallback o Transferencia (va a pending/success manual)
+        // Redirigir al Ticket de Transferencia
         clearCart();
-        window.location.href = `/checkout/pending?external_reference=${data.order_id}&method=transfer`;
+        window.location.href = `/ticket/${data.order_id}`;
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
@@ -207,25 +226,83 @@ export default function CheckoutPage() {
             </label>
           </div>
 
-          {/* ── Transfer Details Box ── */}
+          {/* ── Transfer Details & Form Box ── */}
           {paymentMethod === 'transfer' && (
             <div className={styles.transferBox}>
+              <h3>Completá tus datos</h3>
+              <p className={styles.transferDesc}>
+                Necesitamos esta información para validar tu pago y poder contactarte.
+              </p>
+              
+              <div className={styles.formGroup}>
+                <label>Nombre y Apellido</label>
+                <input 
+                  type="text" 
+                  value={buyerName} 
+                  onChange={(e) => setBuyerName(e.target.value)} 
+                  placeholder="Ej: Juan Pérez" 
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Número de WhatsApp</label>
+                <input 
+                  type="tel" 
+                  value={buyerPhone} 
+                  onChange={(e) => setBuyerPhone(e.target.value)} 
+                  placeholder="Ej: 1123456789" 
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Correo Electrónico</label>
+                <input 
+                  type="email" 
+                  value={buyerEmail} 
+                  onChange={(e) => setBuyerEmail(e.target.value)} 
+                  placeholder="Ej: juan@email.com" 
+                />
+              </div>
+
+              <hr className={styles.divider} />
+
+              <h3>Datos para transferir</h3>
               <p>Transferí exactamente <strong>{formatPrice(totalPrice)}</strong> a los siguientes datos:</p>
+              
               <div className={styles.transferDetails}>
                 <div className={styles.transferRow}>
                   <span>CVU/CBU:</span>
-                  <strong>{process.env.NEXT_PUBLIC_SELLER_CVU || '0000003100000000000000'}</strong>
+                  <div className={styles.copyGroup}>
+                    <strong>{process.env.NEXT_PUBLIC_SELLER_CVU || '0000003100000000000000'}</strong>
+                    <button className={styles.copyBtn} onClick={() => copyToClipboard(process.env.NEXT_PUBLIC_SELLER_CVU || '0000003100000000000000', 'CVU')}>Copiar</button>
+                  </div>
                 </div>
                 <div className={styles.transferRow}>
                   <span>Alias:</span>
-                  <strong>{process.env.NEXT_PUBLIC_SELLER_ALIAS || 'MI.TIENDA.MP'}</strong>
+                  <div className={styles.copyGroup}>
+                    <strong>{process.env.NEXT_PUBLIC_SELLER_ALIAS || 'MI.TIENDA.MP'}</strong>
+                    <button className={styles.copyBtn} onClick={() => copyToClipboard(process.env.NEXT_PUBLIC_SELLER_ALIAS || 'MI.TIENDA.MP', 'Alias')}>Copiar</button>
+                  </div>
                 </div>
                 <div className={styles.transferRow}>
-                  <span>Titular:</span>
-                  <strong>Tienda Prueba</strong>
+                  <span>Total:</span>
+                  <div className={styles.copyGroup}>
+                    <strong>{formatPrice(totalPrice)}</strong>
+                    <button className={styles.copyBtn} onClick={() => copyToClipboard(totalPrice.toString(), 'Monto')}>Copiar</button>
+                  </div>
                 </div>
               </div>
-              <p className={styles.transferHint}>Al finalizar vas a poder enviarnos el comprobante.</p>
+
+              <a 
+                href="https://www.mercadopago.com.ar/" 
+                target="_blank" 
+                rel="noreferrer" 
+                className={styles.mpExternalLink}
+              >
+                Abrir App de Mercado Pago
+              </a>
+
+              <p className={styles.transferHint}>
+                Después de transferir, hacé clic en "Confirmar pedido" para generar tu ticket.
+              </p>
             </div>
           )}
 

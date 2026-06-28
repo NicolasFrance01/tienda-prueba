@@ -1,0 +1,124 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg-body);
+  padding: 20px;
+}
+
+.ticketCard {
+  background: var(--surface);
+  width: 100%;
+  max-width: 400px;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.ticketHeader {
+  background: var(--accent);
+  color: white;
+  padding: 24px;
+  text-align: center;
+}
+
+.ticketHeader h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.orderId {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-top: 8px;
+  opacity: 0.9;
+}
+
+.ticketBody {
+  padding: 24px;
+}
+
+.status {
+  text-align: center;
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+
+.date {
+  text-align: center;
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.divider {
+  border: none;
+  border-top: 2px dashed var(--border);
+  margin: 24px 0;
+}
+
+.buyerInfo h3, .orderSummary h3 {
+  font-size: 1rem;
+  margin: 0 0 12px;
+  color: var(--text-secondary);
+}
+
+.buyerInfo p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.itemsList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+}
+
+.itemsList li {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: var(--bg-body);
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.qrSection {
+  text-align: center;
+}
+
+.qrInstructions {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.qrCodeWrapper {
+  background: white;
+  padding: 16px;
+  display: inline-block;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+.qrSection small {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}

@@ -32,6 +32,9 @@ export interface CreateOrderPayload {
   }>;
   total_amount: number;
   payment_method?: 'mp' | 'transfer';
+  buyer_name?: string;
+  buyer_phone?: string;
+  buyer_email?: string;
 }
 
 /** Respuesta de POST /api/orders */

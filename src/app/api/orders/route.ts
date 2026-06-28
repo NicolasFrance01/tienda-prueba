@@ -34,13 +34,16 @@ export async function POST(req: NextRequest) {
     const paymentMethod = body.payment_method === 'transfer' ? 'transfer' : 'mp';
 
     const orderRows = await sql`
-      INSERT INTO orders (status, total_amount, currency, items_count, payment_method)
+      INSERT INTO orders (status, total_amount, currency, items_count, payment_method, buyer_name, buyer_phone, buyer_email)
       VALUES (
         'pending',
         ${body.total_amount},
         'ARS',
         ${body.items.reduce((sum, i) => sum + i.quantity, 0)},
-        ${paymentMethod}
+        ${paymentMethod},
+        ${body.buyer_name || null},
+        ${body.buyer_phone || null},
+        ${body.buyer_email || null}
       )
       RETURNING id, created_at
     ` as { id: number; created_at: string }[];
@@ -131,14 +134,25 @@ export async function POST(req: NextRequest) {
 /**
  * Devuelve todas las órdenes con sus items (útil para panel de admin).
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const authHeader = req.headers.get('authorization');
+    const expectedPassword = process.env.ADMIN_PASSWORD;
+
+    if (expectedPassword && authHeader !== `Bearer ${expectedPassword}`) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
     const orders = await sql`
       SELECT
         o.id,
         o.status,
         o.total_amount,
         o.currency,
+        o.payment_method,
+        o.buyer_name,
+        o.buyer_phone,
+        o.buyer_email,
         o.items_count,
         o.mp_preference_id,
         o.mp_payment_id,
