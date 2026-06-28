@@ -3,12 +3,37 @@ import { notFound } from 'next/navigation';
 import { formatPrice } from '@/lib/formatPrice';
 import styles from './TicketPage.module.css';
 
+import { sql } from '@/lib/db';
+
 async function getOrder(id: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-  const res = await fetch(`${baseUrl}/api/orders/${id}`, { cache: 'no-store' });
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data.order;
+  const orderId = parseInt(id, 10);
+  if (isNaN(orderId)) return null;
+
+  const orders = await sql`
+    SELECT
+      o.id,
+      o.status,
+      o.total_amount,
+      o.currency,
+      o.payment_method,
+      o.buyer_name,
+      o.buyer_phone,
+      o.buyer_email,
+      o.created_at,
+      json_agg(
+        json_build_object(
+          'id',            oi.id,
+          'product_name',  oi.product_name,
+          'quantity',      oi.quantity,
+          'subtotal',      oi.subtotal
+        )
+      ) AS items
+    FROM orders o
+    LEFT JOIN order_items oi ON oi.order_id = o.id
+    WHERE o.id = ${orderId}
+    GROUP BY o.id
+  `;
+  return orders.length > 0 ? orders[0] : null;
 }
 
 export default async function TicketPage({ params }: { params: Promise<{ id: string }> }) {
@@ -19,8 +44,11 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
     notFound();
   }
 
-  // The QR code links to the admin panel for this specific order
-  const adminUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/admin?order=${order.id}`;
+  let baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  if (!baseUrl.startsWith('http')) {
+    baseUrl = `https://${baseUrl}`;
+  }
+  const adminUrl = `${baseUrl}/admin?order=${order.id}`;
 
   return (
     <main className={styles.page}>
