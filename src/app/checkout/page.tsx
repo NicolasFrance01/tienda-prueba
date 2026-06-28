@@ -22,9 +22,10 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [savedOrderId, setSavedOrderId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<'mp' | 'transfer'>('mp');
 
-  // ── Crear orden en DB + preferencia en MP → redirigir ─────
-  const handleMercadoPago = async () => {
+  // ── Crear orden en DB + procesar pago ─────
+  const handleCheckout = async () => {
     setLoading(true);
     setError(null);
 
@@ -37,6 +38,7 @@ export default function CheckoutPage() {
           quantity: i.quantity,
         })),
         total_amount: totalPrice,
+        payment_method: paymentMethod,
       };
 
       const res = await fetch('/api/orders', {
@@ -52,14 +54,14 @@ export default function CheckoutPage() {
 
       const data = await res.json();
 
-      // Redirigir al checkout de Mercado Pago
-      if (data.init_point) {
+      // Redirigir según método de pago
+      if (paymentMethod === 'mp' && data.init_point) {
         clearCart();
         window.location.href = data.init_point;
       } else {
-        // Fallback: mostrar confirmación si no hay init_point
-        setSavedOrderId(data.order_id);
+        // Fallback o Transferencia (va a pending/success manual)
         clearCart();
+        window.location.href = `/checkout/pending?external_reference=${data.order_id}&method=transfer`;
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
@@ -170,33 +172,95 @@ export default function CheckoutPage() {
             <span className={styles.totalValue}>{formatPrice(totalPrice)}</span>
           </div>
 
+          {/* ── Payment Method Selector ── */}
+          <div className={styles.methodSelector}>
+            <h3 className={styles.methodTitle}>Medio de pago</h3>
+            
+            <label className={`${styles.methodOption} ${paymentMethod === 'mp' ? styles.methodActive : ''}`}>
+              <input
+                type="radio"
+                name="payment_method"
+                value="mp"
+                checked={paymentMethod === 'mp'}
+                onChange={() => setPaymentMethod('mp')}
+              />
+              <span className={styles.methodDetails}>
+                <strong>Mercado Pago</strong>
+                <small>Tarjetas, débito, saldo</small>
+              </span>
+              <span className={styles.methodIcon}>💳</span>
+            </label>
+
+            <label className={`${styles.methodOption} ${paymentMethod === 'transfer' ? styles.methodActive : ''}`}>
+              <input
+                type="radio"
+                name="payment_method"
+                value="transfer"
+                checked={paymentMethod === 'transfer'}
+                onChange={() => setPaymentMethod('transfer')}
+              />
+              <span className={styles.methodDetails}>
+                <strong>Transferencia / CVU</strong>
+                <small>Acreditación rápida</small>
+              </span>
+              <span className={styles.methodIcon}>🏦</span>
+            </label>
+          </div>
+
+          {/* ── Transfer Details Box ── */}
+          {paymentMethod === 'transfer' && (
+            <div className={styles.transferBox}>
+              <p>Transferí exactamente <strong>{formatPrice(totalPrice)}</strong> a los siguientes datos:</p>
+              <div className={styles.transferDetails}>
+                <div className={styles.transferRow}>
+                  <span>CVU/CBU:</span>
+                  <strong>{process.env.NEXT_PUBLIC_SELLER_CVU || '0000003100000000000000'}</strong>
+                </div>
+                <div className={styles.transferRow}>
+                  <span>Alias:</span>
+                  <strong>{process.env.NEXT_PUBLIC_SELLER_ALIAS || 'MI.TIENDA.MP'}</strong>
+                </div>
+                <div className={styles.transferRow}>
+                  <span>Titular:</span>
+                  <strong>Tienda Prueba</strong>
+                </div>
+              </div>
+              <p className={styles.transferHint}>Al finalizar vas a poder enviarnos el comprobante.</p>
+            </div>
+          )}
+
           {/* ── Error message ── */}
           {error && (
             <p className={styles.errorMsg}>⚠️ {error}</p>
           )}
 
-          {/* ══ Mercado Pago CTA ═════════════════════════════
-              POST /api/orders guarda la orden en Neon DB.
-              Cuando conectes MP, la API devolverá init_point.
-          ══════════════════════════════════════════════════ */}
+          {/* ══ CTA Button ════════════════════════════════════ */}
           <button
-            id="pay-with-mp-btn"
-            className={`${styles.mpBtn} ${loading ? styles.mpBtnLoading : ''}`}
-            onClick={handleMercadoPago}
+            id="pay-btn"
+            className={`${paymentMethod === 'mp' ? styles.mpBtn : styles.primaryBtn} ${loading ? styles.btnLoading : ''}`}
+            onClick={handleCheckout}
             disabled={loading}
           >
             {loading ? (
               <span className={styles.spinner} />
-            ) : (
+            ) : paymentMethod === 'mp' ? (
               <span className={styles.mpLogo}>💳</span>
+            ) : (
+              <span className={styles.mpLogo}>🏦</span>
             )}
-            {loading ? 'Procesando...' : 'Pagar con Mercado Pago'}
+            
+            {loading 
+              ? 'Procesando...' 
+              : paymentMethod === 'mp' 
+                ? 'Pagar con Mercado Pago' 
+                : 'Confirmar pedido'}
           </button>
 
-          <p className={styles.mpDisclaimer}>
-            Serás redirigido a Mercado Pago para completar tu pago de forma
-            segura.
-          </p>
+          {paymentMethod === 'mp' && (
+            <p className={styles.mpDisclaimer}>
+              Serás redirigido a Mercado Pago para completar tu pago de forma segura.
+            </p>
+          )}
 
           <Link href="/catalogo" className={styles.continueShop}>
             ← Seguir comprando

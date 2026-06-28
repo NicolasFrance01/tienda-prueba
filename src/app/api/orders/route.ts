@@ -31,13 +31,16 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Insertar orden en DB ───────────────────────────────────────────────
+    const paymentMethod = body.payment_method === 'transfer' ? 'transfer' : 'mp';
+
     const orderRows = await sql`
-      INSERT INTO orders (status, total_amount, currency, items_count)
+      INSERT INTO orders (status, total_amount, currency, items_count, payment_method)
       VALUES (
         'pending',
         ${body.total_amount},
         'ARS',
-        ${body.items.reduce((sum, i) => sum + i.quantity, 0)}
+        ${body.items.reduce((sum, i) => sum + i.quantity, 0)},
+        ${paymentMethod}
       )
       RETURNING id, created_at
     ` as { id: number; created_at: string }[];
@@ -59,51 +62,61 @@ export async function POST(req: NextRequest) {
       `;
     }
 
-    // ── Crear preferencia en Mercado Pago ──────────────────────────────────
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
+    // ── Lógica de Mercado Pago (solo si el método es 'mp') ────────────────
+    if (paymentMethod === 'mp') {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
 
-    const mpPreference = await preferenceClient.create({
-      body: {
-        external_reference: String(order.id),
-        items: body.items.map((item) => ({
-          id: item.product_id,
-          title: item.product_name,
-          quantity: item.quantity,
-          unit_price: item.product_price,
-          currency_id: 'ARS',
-        })),
-        back_urls: {
-          success: `${baseUrl}/checkout/success`,
-          failure: `${baseUrl}/checkout/failure`,
-          pending: `${baseUrl}/checkout/pending`,
+      const mpPreference = await preferenceClient.create({
+        body: {
+          external_reference: String(order.id),
+          items: body.items.map((item) => ({
+            id: item.product_id,
+            title: item.product_name,
+            quantity: item.quantity,
+            unit_price: item.product_price,
+            currency_id: 'ARS',
+          })),
+          back_urls: {
+            success: `${baseUrl}/checkout/success`,
+            failure: `${baseUrl}/checkout/failure`,
+            pending: `${baseUrl}/checkout/pending`,
+          },
+          auto_return: 'approved',
+          statement_descriptor: 'Tienda Dev',
+          metadata: {
+            order_id: order.id,
+          },
         },
-        auto_return: 'approved',
-        statement_descriptor: 'Tienda Dev',
-        metadata: {
+      });
+
+      await sql`
+        UPDATE orders
+        SET mp_preference_id = ${mpPreference.id ?? null},
+            updated_at       = NOW()
+        WHERE id = ${order.id}
+      `;
+
+      const useSandbox = process.env.MP_SANDBOX === 'true';
+      const initPoint = useSandbox
+        ? mpPreference.sandbox_init_point
+        : mpPreference.init_point;
+
+      return NextResponse.json(
+        {
           order_id: order.id,
+          preference_id: mpPreference.id,
+          init_point: initPoint,
+          created_at: order.created_at,
         },
-      },
-    });
+        { status: 201 }
+      );
+    }
 
-    // ── Actualizar orden con el preference_id de MP ────────────────────────
-    await sql`
-      UPDATE orders
-      SET mp_preference_id = ${mpPreference.id ?? null},
-          updated_at       = NOW()
-      WHERE id = ${order.id}
-    `;
-
-    // ── Elegir la URL según el modo (sandbox vs producción) ────────────────
-    const useSandbox = process.env.MP_SANDBOX === 'true';
-    const initPoint = useSandbox
-      ? mpPreference.sandbox_init_point
-      : mpPreference.init_point;
-
+    // ── Respuesta para Transferencia ───────────────────────────────────────
     return NextResponse.json(
       {
         order_id: order.id,
-        preference_id: mpPreference.id,
-        init_point: initPoint,
+        status: 'pending',
         created_at: order.created_at,
       },
       { status: 201 }

@@ -213,6 +213,143 @@
 }
 
 /* ── Mercado Pago Button ── */
+/* ── Payment Method Selector ── */
+.methodSelector {
+  margin: 24px 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.methodTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.methodOption {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--surface);
+}
+
+.methodOption input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  margin-right: 16px;
+  accent-color: var(--accent);
+}
+
+.methodDetails {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.methodDetails strong {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.methodDetails small {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.methodIcon {
+  font-size: 1.5rem;
+}
+
+.methodActive {
+  border-color: var(--accent);
+  background: rgba(0, 112, 243, 0.04);
+}
+
+/* ── Transfer Box ── */
+.transferBox {
+  background: var(--bg-body);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.transferBox p {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.transferDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--surface);
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.transferRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.transferRow span {
+  color: var(--text-muted);
+}
+
+.transferRow strong {
+  color: var(--text-primary);
+}
+
+.transferHint {
+  font-size: 0.8rem !important;
+  color: var(--text-muted) !important;
+  margin: 0 !important;
+  text-align: center;
+}
+
+/* ── CTA Buttons ── */
+.primaryBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--accent);
+  color: #fff;
+  transition: all 0.2s ease;
+  margin-bottom: 12px;
+}
+
+.primaryBtn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+}
+
+.primaryBtn:active {
+  transform: translateY(0);
+}
+
+.btnLoading {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
 .mpBtn {
   display: flex;
   align-items: center;

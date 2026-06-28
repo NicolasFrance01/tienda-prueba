@@ -31,6 +31,7 @@ export interface CreateOrderPayload {
     quantity: number;
   }>;
   total_amount: number;
+  payment_method?: 'mp' | 'transfer';
 }
 
 /** Respuesta de POST /api/orders */

@@ -9,15 +9,19 @@ function PendingContent() {
   const params = useSearchParams();
   const paymentId = params.get('payment_id');
   const externalRef = params.get('external_reference');
+  const method = params.get('method');
 
   return (
     <div className={styles.page}>
       <div className={styles.card}>
         <span className={styles.icon}>⏳</span>
-        <h1 className={styles.title}>Pago en proceso</h1>
+        <h1 className={styles.title}>
+          {method === 'transfer' ? 'Pedido registrado' : 'Pago en proceso'}
+        </h1>
         <p className={styles.description}>
-          Tu pago está siendo procesado. Mercado Pago te notificará por correo
-          electrónico cuando se confirme.
+          {method === 'transfer' 
+            ? 'Tu pedido fue recibido con éxito. Por favor, realizá la transferencia y envianos el comprobante para que podamos confirmarlo y preparar tu envío.'
+            : 'Tu pago está siendo procesado. Mercado Pago te notificará por correo electrónico cuando se confirme.'}
         </p>
 
         {(paymentId || externalRef) && (
