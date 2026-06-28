@@ -89,23 +89,7 @@ export default function CheckoutPage() {
     }
   };
 
-  // ── Orden guardada con éxito ──────────────────────────────
-  if (savedOrderId) {
-    return (
-      <div className={`container ${styles.empty}`}>
-        <span className={styles.emptyIcon}>✅</span>
-        <h1 className={styles.emptyTitle}>¡Orden registrada!</h1>
-        <p className={styles.emptyText}>
-          Tu orden <strong>#{savedOrderId}</strong> fue guardada correctamente.
-          <br />
-          Cuando conectemos Mercado Pago, serás redirigido al pago automáticamente.
-        </p>
-        <Link href="/catalogo" className={styles.backBtn}>
-          ← Volver al catálogo
-        </Link>
-      </div>
-    );
-  }
+
 
   if (items.length === 0) {
     return (
