@@ -32,7 +32,7 @@ async function getOrder(id: string) {
     LEFT JOIN order_items oi ON oi.order_id = o.id
     WHERE o.id = ${orderId}
     GROUP BY o.id
-  `;
+  ` as any[];
   return orders.length > 0 ? orders[0] : null;
 }
 
